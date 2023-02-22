@@ -1,0 +1,13 @@
+package com.word.game.word_game.controller;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@Controller
+public class MainController {
+    @GetMapping("/chat")
+    public String index(){
+        return "index";
+    }
+}
