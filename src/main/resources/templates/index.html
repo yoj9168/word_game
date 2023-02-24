@@ -9,6 +9,7 @@
         <div class="container">
             <div class="col-6">
                 <label for = "initial_text"><b></b></label>
+                <label for = "count"><b></b></label>
             </div>
             <div class="col-6">
                 <label for = "correct"><b></b></label>
@@ -32,13 +33,12 @@
 </html>
 <script th:inline="javascript">
     $(document).ready(function(){
-        const username = "user";
         $("#button-send").on("click", (e) => {
             send();
         });
 
         const websocket = new WebSocket("ws://localhost:8080/ws/chat");
-
+        var username;
         websocket.onmessage = onMessage;
         websocket.onopen = onOpen;
         websocket.onclose = onClose;
@@ -57,12 +57,13 @@
 
         //채팅창에 들어왔을 때
         function onOpen(evt) {
-            var str = username + ": 님이 입장하셨습니다.";
+            var str = "입장하셨습니다.";
             websocket.send(str);
         }
 
         function onMessage(msg) {
             var data = msg.data;
+            console.log("data "+data);
             var sessionId = null;
             //데이터를 보낸 사람
             var message = null;
@@ -82,30 +83,49 @@
             console.log("sessionID : " + sessionId);
             console.log("cur_session : " + cur_session);
 
-            if(sessionId == "correct"){
-                $("label[for='correct']").text("정답입니다.");
-            }
-            else if(sessionId == "wrong"){
-                $("label[for='correct']").text("오답입니다.");
-            }
             //로그인 한 클라이언트와 타 클라이언트를 분류하기 위함
             if(message == undefined){
-                $("label[for='initial_text']").text(sessionId); //초성 설정
-            }
-            else{
-                if(sessionId == cur_session){
-                    var str = "<div class='col-6'>";
-                    str += "<div class='alert alert-secondary'>";
-                    str += "<b>" + sessionId + " : " + message + "</b>";
-                    str += "</div></div>";
-                    $("#msgArea").append(str);
+                if(sessionId == "correct"){
+                    $("label[for='correct']").text("정답입니다.");
+                }
+                else if(sessionId == "wrong"){
+                    $("label[for='correct']").text("오답입니다.");
+                }
+                else if(sessionId == "error") {
+                    alert("게임 참가 불가!!");
+                }
+                else if(sessionId == "time_finish"){
+
+                }
+                else if(!isNaN(sessionId)){
+                    $("label[for='count']").text(sessionId);
+                    console.log("시간 " + sessionId);
                 }
                 else{
-                    var str = "<div class='col-6'>";
-                    str += "<div class='alert alert-warning'>";
-                    str += "<b>" + sessionId + " : " + message + "</b>";
-                    str += "</div></div>";
-                    $("#msgArea").append(str);
+                    $("label[for='initial_text']").text(sessionId); //초성 설정
+                }
+            }
+            else {
+                if(sessionId == "ID"){
+                    username = message;
+                    console.log("username : " + username);
+                }
+                if (sessionId == "시간") {
+                    console.log(message);
+                } else {
+                    if (sessionId == cur_session) {
+                        var str = "<div class='col-6'>";
+                        str += "<div class='alert alert-secondary'>";
+                        str += "<b>" + sessionId + " : " + message + "</b>";
+                        str += "</div></div>";
+                        $("#msgArea").append(str);
+                    } else {
+                        var str = "<div class='col-6'>";
+                        str += "<div class='alert alert-warning'>";
+                        str += "<b style='color:red'>" + sessionId + " : " + message + "</b>";
+                        str += "</div></div>";
+                        $("#msgArea").append(str);
+                    }
                 }
             }
         }

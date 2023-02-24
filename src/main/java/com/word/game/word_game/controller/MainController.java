@@ -1,5 +1,7 @@
 package com.word.game.word_game.controller;
 
+import com.word.game.word_game.message.ManageMessage;
+import lombok.NoArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -10,4 +12,5 @@ public class MainController {
     public String index(){
         return "index";
     }
+
 }
