@@ -62,27 +62,35 @@ public class ManageMessage {
         else {
             list.add(session);
             Timer timer = new Timer();
-            final int[] second = {5};
+            final int[] second = {10};
             timer.schedule(new TimerTask() {
                 @Override
                 public void run() {
                     try {
                         session.sendMessage(new TextMessage(String.valueOf(second[0])));
-                        second[0]--;
-                        if(second[0] <= 0){
-                            session.sendMessage(new TextMessage("time_finish"));
-                            letter = initialLetter.getLetter();
-                            log.info(letter);
-                            for(WebSocketSession webSocketSession : list){
-                                webSocketSession.sendMessage(new TextMessage(letter));
-                            }
-                            second[0] = 5;
-                        }
                     } catch (IOException e) {
                         timer.cancel();
                     }
+                    second[0]--;
+                    if(second[0] < 0){
+                        try {
+                            session.sendMessage(new TextMessage("time_finish"));
+                        } catch (IOException e) {
+                            timer.cancel();
+                        }
+                        letter = initialLetter.getLetter();
+                        log.info(letter);
+                        for(WebSocketSession webSocketSession : list){
+                            try {
+                                webSocketSession.sendMessage(new TextMessage(letter));
+                            } catch (IOException e) {
+                                timer.cancel();
+                            }
+                        }
+                        second[0] = 10;
+                    }
                 }
-            }, 1000, 1000);
+            }, 0, 1000);
         }
     }
     //client와 server가 connection이 끊겼을 때
