@@ -10,6 +10,8 @@
             <div class="col-6">
                 <label for = "initial_text"><b></b></label>
                 <label for = "count"><b></b></label>
+                <label for = "life"><b></b></label>
+
             </div>
             <div class="col-6">
                 <label for = "correct"><b></b></label>
@@ -39,90 +41,120 @@
 
         const websocket = new WebSocket("ws://localhost:8080/ws/chat");
         var username;
+        var life = 100;
+
         websocket.onmessage = onMessage;
         websocket.onopen = onOpen;
         websocket.onclose = onClose;
 
+        $("label[for='life']").text("점수 : " + life);
+
         function send(){
             let msg = document.getElementById("msg");
-            console.log(username + ":" + msg.value);
-            websocket.send(username + ":"+ msg.value);
+            websocket.send(JSON.stringify({"command":username, "message":msg.value}));
             msg.value = '';
         }
 
         function onClose(evt) {
-            var str = username + ": 님이 방을 나가셨습니다.";
-            websocket.send(str);
+            websocket.send(JSON.stringify({"command":username, "message":" 님이 방을 나가셨습니다."}));
         }
 
         //채팅창에 들어왔을 때
         function onOpen(evt) {
-            var str = "입장하셨습니다.";
-            websocket.send(str);
+            websocket.send(JSON.stringify({"command":"새로운 유저", "message":"가 입장하셨습니다."}));
         }
 
         function onMessage(msg) {
-            var data = msg.data;
-            console.log("data "+data);
-            var sessionId = null;
-            //데이터를 보낸 사람
-            var message = null;
-            var arr = data.split(":");
-
-            for(var i=0; i<arr.length; i++){
-                console.log('arr[' + i + ']: ' + arr[i]);
+            if(life < 0){
+                alert("게임에서 패배하셨습니다.");
+                onClose();
             }
+            var data = msg.data;
+            var jsonValue = JSON.parse(data);
+            console.log("data "+data);
+            var command = jsonValue.command;
+            var message = jsonValue.message;
+            var list = jsonValue.list;
 
             var cur_session = username;
 
-            //현재 세션에 로그인 한 사람
-            console.log("cur_session : " + cur_session);
-            sessionId = arr[0];
-            message = arr[1];
-
-            console.log("sessionID : " + sessionId);
-            console.log("cur_session : " + cur_session);
-
-            //로그인 한 클라이언트와 타 클라이언트를 분류하기 위함
-            if(message == undefined){
-                if(sessionId == "correct"){
+            if(command == "ID"){
+                username = message;
+                console.log(username);
+            }
+            else if(command == "answer"){
+                if(message == "correct"){
                     $("label[for='correct']").text("정답입니다.");
-                }
-                else if(sessionId == "wrong"){
-                    $("label[for='correct']").text("오답입니다.");
-                }
-                else if(sessionId == "error") {
-                    alert("게임 참가 불가!!");
-                }
-                else if(sessionId == "time_finish"){
-
-                }
-                else if(!isNaN(sessionId)){
-                    $("label[for='count']").text(sessionId);
-                    console.log("시간 " + sessionId);
+                    document.getElementById('msg').readOnly = true;
                 }
                 else{
-                    $("label[for='initial_text']").text(sessionId); //초성 설정
+                    $("label[for='correct']").text("오답입니다.");
+                }
+            }
+            else if(command == "status"){
+                if(message == "error"){
+                    alert("게임 참가 불가!");
+                }
+            }
+            else if(command == "time"){
+                if(message == "time_out"){
+
+                    if(!document.getElementById('msg').readOnly){
+                        var str = "<div class='col-6'>";
+                        str += "<div class='alert alert-warning'>";
+                        str += "<b style='color:deeppink'>" + "시간만료입니다. 10점 감점입니다." + "</b>";
+                        str += "</div></div>";
+                        $("#msgArea").append(str);
+                        life = life - 20;
+                        $("label[for='life']").text("점수 : " + life);
+                    }
+                    document.getElementById('msg').readOnly = false;
+                }
+                else{
+                    $("label[for='count']").text(message);
+                    console.log("시간 " + message);
+                }
+            }
+            else if(command == "firstLetter"){
+                $("label[for='initial_text']").text(message); //초성 설정
+            }
+            else if(command == "definitions"){
+                if(message == "사전에 정의되지 않은 단어입니다."){
+                    var str = "<div class='col-6'>";
+                    str += "<div class='alert alert-warning'>";
+                    str += "<b style='color:blue'>" + message + "</b>";
+                    str += "</div></div>";
+                    $("#msgArea").append(str);
+                }
+                else{
+                    var str = "<div class='col-6'>";
+                    str += "<div class='alert alert-warning'>";
+                    str += "<b style='color:blue'>";
+                    list.forEach(element => str += (element+"</br>"));
+                    str += "</b>";
+                    str += "</div></div>";
+                    $("#msgArea").append(str);
                 }
             }
             else {
-                if(sessionId == "ID"){
-                    username = message;
-                    console.log("username : " + username);
+                if (command == cur_session) {
+                    var str = "<div class='col-6'>";
+                    str += "<div class='alert alert-secondary'>";
+                    str += "<b>" + command + " : " + message + "</b>";
+                    str += "</div></div>";
+                    $("#msgArea").append(str);
                 }
-                if (sessionId == "시간") {
-                    console.log(message);
-                } else {
-                    if (sessionId == cur_session) {
+                else {
+                    if (command == "새로운 유저") {
                         var str = "<div class='col-6'>";
                         str += "<div class='alert alert-secondary'>";
-                        str += "<b>" + sessionId + " : " + message + "</b>";
+                        str += "<b>" + username + message + "</b>";
                         str += "</div></div>";
                         $("#msgArea").append(str);
                     } else {
                         var str = "<div class='col-6'>";
                         str += "<div class='alert alert-warning'>";
-                        str += "<b style='color:red'>" + sessionId + " : " + message + "</b>";
+                        str += "<b style='color:red'>" + command + " : " + message + "</b>";
                         str += "</div></div>";
                         $("#msgArea").append(str);
                     }
