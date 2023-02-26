@@ -8,7 +8,9 @@ public class CheckLogic {
                 "ㅆ", "ㅇ", "ㅈ", "ㅉ", "ㅊ",
                 "ㅋ", "ㅌ", "ㅍ", "ㅎ"
         };
-
+        if(message.length() < 1){
+            return false;
+        }
         for(int i = 0; i < 2; i++){
             char chName = message.charAt(i);
             String missionLetter = String.valueOf(mission.charAt(i));
