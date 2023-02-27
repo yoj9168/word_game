@@ -1,5 +1,8 @@
 package com.word.game.word_game.utility;
 
+import java.util.List;
+import java.util.Set;
+
 public class CheckLogic {
     public static boolean checkLetter(String message, String mission){
         String[] chs = {
@@ -25,5 +28,10 @@ public class CheckLogic {
             }
         }
         return true;
+    }
+    public static boolean checkWordExist(Set<String> set, String word){
+        if(set.contains(word))
+            return false;
+        else return true;
     }
 }
