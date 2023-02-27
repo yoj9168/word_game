@@ -3,49 +3,55 @@
 <head>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link href="/styles.css" rel="stylesheet" type="text/css">
 </head>
 <th:block>
     <th:block th:fragment="content">
-        <nav class="navbar navbar-default navbar-fixed-top">
+        <body>
+        <nav class="navbar fixed-top navbar-light bg-light">
             <div class="container-fluid">
-                <a class="navbar-brand text-center">초성게임</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                        <li class="nav-item">
-                            <a class="nav-link active text-center" aria-current="page"s>Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link active text-center">Link</a>
-                        </li>
+                <div class="container">
+                    <div class="row">
+                        <div class="col">
+                            <button class="btn btn-outline-secondary" type="button" id="game_start">게임 시작</button>
+                        </div>
+                    </div>
                 </div>
-            </div>
-        </nav>
-        <div class="container">
-            <div class="col-6">
-                <label for = "initial_text"><b></b></label>
-                <label for = "count"><b></b></label>
-                <label for = "life"><b></b></label>
-
-            </div>
-            <div class="col-6">
-                <label for = "correct"><b></b></label>
-            </div>
-            <div>
-                <div id="msgArea" class="col"></div>
-                <div class="col-6">
-                    <div class="input-group mb-3">
-                        <input type="text" id="msg" class="form-control" aria-label="Recipient's username" aria-describedby="button-addon2">
-                        <div class="input-group-append">
-                            <button class="btn btn-outline-secondary" type="button" id="button-send">전송</button>
+                <div class="container">
+                    <div class="row">
+                        <div class="col">
+                            <label for = "initial_text"><b></b></label>
+                        </div>
+                        <div class="col">
+                            <label for = "count"><b></b></label>
+                        </div>
+                        <div class="col">
+                            <label for = "life"><b></b></label>
+                        </div>
+                    </div>
+                </div>
+                <div class="container">
+                    <div class="row">
+                        <div class="col">
+                            <label for = "correct"><b></b></label>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-
+        </nav>
+            <div class="container">
+                <div id="msgArea" class="col"></div>
+                    <div class="col-6">
+                        <div class="input-group mb-3">
+                            <input type="text" id="msg" class="form-control" aria-label="Recipient's username" aria-describedby="button-addon2">
+                            <div class="input-group-append">
+                                <button class="btn btn-outline-secondary" type="button" id="button-send">전송</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </body>
     </th:block>
 </th:block>
 
@@ -55,17 +61,24 @@
         $("#button-send").on("click", (e) => {
             send();
         });
-
+        $("#game_start").on("click",(e) =>{
+            game_start();
+            $("#game_start").hide();
+        });
         const websocket = new WebSocket("ws://localhost:8080/ws/chat");
         var username;
         var life = 100;
+        var status = false;
 
         websocket.onmessage = onMessage;
         websocket.onopen = onOpen;
         websocket.onclose = onClose;
 
         $("label[for='life']").text("점수 : " + life);
-
+        function game_start(){
+            websocket.send(JSON.stringify({"command":"game_start", "message":"on"}));
+            status = true;
+        }
         function send(){
             let msg = document.getElementById("msg");
             websocket.send(JSON.stringify({"command":username, "message":msg.value}));
@@ -100,12 +113,14 @@
                 console.log(username);
             }
             else if(command == "answer"){
-                if(message == "correct"){
+                if(message == "correct" && status){
                     $("label[for='correct']").text("정답입니다.");
                     document.getElementById('msg').readOnly = true;
                 }
                 else{
-                    $("label[for='correct']").text("오답입니다.");
+                    if(status) {
+                        $("label[for='correct']").text("오답입니다.");
+                    }
                 }
             }
             else if(command == "status"){
@@ -114,24 +129,25 @@
                 }
             }
             else if(command == "time"){
-                if(message == "time_out"){
-                    if(!document.getElementById('msg').readOnly){
-                        var str = "<div class='col-6'>";
-                        str += "<div class='alert alert-danger'>";
-                        str += "<b>"+"시간만료입니다. 10점 감점입니다." + "</b>";
-                        str += "</div></div>";
-                        $("#msgArea").append(str);
-                        life = life - 20;
-                        $("label[for='life']").text("점수 : " + life);
+                if(status) {
+                    if (message == "time_out") {
+                        if (!document.getElementById('msg').readOnly) {
+                            var str = "<div class='col-6'>";
+                            str += "<div class='alert alert-danger'>";
+                            str += "<b>" + "시간만료입니다. 10점 감점입니다." + "</b>";
+                            str += "</div></div>";
+                            $("#msgArea").append(str);
+                            life = life - 20;
+                            $("label[for='life']").text("점수 : " + life);
+                        }
+                        document.getElementById('msg').readOnly = false;
+                    } else {
+                        $("label[for='count']").text(message);
+                        console.log("시간 " + message);
                     }
-                    document.getElementById('msg').readOnly = false;
-                }
-                else{
-                    $("label[for='count']").text(message);
-                    console.log("시간 " + message);
                 }
             }
-            else if(command == "firstLetter"){
+            else if(command == "firstLetter" && status){
                 $("label[for='initial_text']").text(message); //초성 설정
             }
             else if(command == "word"){
@@ -175,11 +191,22 @@
                         str += "</div></div>";
                         $("#msgArea").append(str);
                     } else {
-                        var str = "<div class='col-6'>";
-                        str += "<div class='alert alert-warning'>";
-                        str += "<b>" + command + " : " + message + "</b>";
-                        str += "</div></div>";
-                        $("#msgArea").append(str);
+                        if(status) {
+                            if(command == "game_start"){
+                                var str = "<div class='col-6'>";
+                                str += "<div class='alert alert-warning'>";
+                                str += "<b>" + "게임 시작~!"+ "</b>";
+                                str += "</div></div>";
+                                $("#msgArea").append(str);
+                            }
+                            else {
+                                var str = "<div class='col-6'>";
+                                str += "<div class='alert alert-warning'>";
+                                str += "<b>" + command + " : " + message + "</b>";
+                                str += "</div></div>";
+                                $("#msgArea").append(str);
+                            }
+                        }
                     }
                 }
             }
