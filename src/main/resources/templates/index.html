@@ -2,10 +2,27 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 </head>
 <th:block>
     <th:block th:fragment="content">
-
+        <nav class="navbar navbar-default navbar-fixed-top">
+            <div class="container-fluid">
+                <a class="navbar-brand text-center">초성게임</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                        <li class="nav-item">
+                            <a class="nav-link active text-center" aria-current="page"s>Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link active text-center">Link</a>
+                        </li>
+                </div>
+            </div>
+        </nav>
         <div class="container">
             <div class="col-6">
                 <label for = "initial_text"><b></b></label>
@@ -98,11 +115,10 @@
             }
             else if(command == "time"){
                 if(message == "time_out"){
-
                     if(!document.getElementById('msg').readOnly){
                         var str = "<div class='col-6'>";
-                        str += "<div class='alert alert-warning'>";
-                        str += "<b style='color:deeppink'>" + "시간만료입니다. 10점 감점입니다." + "</b>";
+                        str += "<div class='alert alert-danger'>";
+                        str += "<b>"+"시간만료입니다. 10점 감점입니다." + "</b>";
                         str += "</div></div>";
                         $("#msgArea").append(str);
                         life = life - 20;
@@ -118,18 +134,25 @@
             else if(command == "firstLetter"){
                 $("label[for='initial_text']").text(message); //초성 설정
             }
+            else if(command == "word"){
+                var str = "<div class='col-6'>";
+                str += "<div class='alert alert-warning'>";
+                str += "<b>"+message + "</b>";
+                str += "</div></div>";
+                $("#msgArea").append(str);
+            }
             else if(command == "definitions"){
                 if(message == "사전에 정의되지 않은 단어입니다."){
                     var str = "<div class='col-6'>";
                     str += "<div class='alert alert-warning'>";
-                    str += "<b style='color:blue'>" + message + "</b>";
+                    str += "<b>"+message + "</b>";
                     str += "</div></div>";
                     $("#msgArea").append(str);
                 }
                 else{
                     var str = "<div class='col-6'>";
-                    str += "<div class='alert alert-warning'>";
-                    str += "<b style='color:blue'>";
+                    str += "<div class='alert alert-success'>";
+                    str += "<b>";
                     list.forEach(element => str += (element+"</br>"));
                     str += "</b>";
                     str += "</div></div>";
@@ -139,7 +162,7 @@
             else {
                 if (command == cur_session) {
                     var str = "<div class='col-6'>";
-                    str += "<div class='alert alert-secondary'>";
+                    str += "<div class='alert alert-primary'>";
                     str += "<b>" + command + " : " + message + "</b>";
                     str += "</div></div>";
                     $("#msgArea").append(str);
@@ -154,7 +177,7 @@
                     } else {
                         var str = "<div class='col-6'>";
                         str += "<div class='alert alert-warning'>";
-                        str += "<b style='color:red'>" + command + " : " + message + "</b>";
+                        str += "<b>" + command + " : " + message + "</b>";
                         str += "</div></div>";
                         $("#msgArea").append(str);
                     }
