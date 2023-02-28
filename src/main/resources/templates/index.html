@@ -21,12 +21,12 @@
                 <div class="row">
                     <div class="col">
                         <div class="d-flex align-items-center justify-content-center" style="height: 23px;">
-                            <p class="count"></p>
+                            <p id = "countText">제한 시간 : &nbsp;</p><p id="count"></p>
                         </div>
                     </div>
                     <div class="col">
                         <div class="d-flex align-items-center justify-content-center"style="height: 23px;">
-                            <p class="life"></p>
+                            <p class = "lifeText">점수 : &nbsp;</p><p class="life"></p>
                         </div>
                     </div>
                 </div>
@@ -35,7 +35,7 @@
                 <div class="row">
                     <div class="col">
                         <div class="d-flex align-items-center justify-content-center" style="height: 23px;">
-                            <p class="correct"></p>
+                            <p id="correct"></p>
                         </div>
                     </div>
                 </div>
@@ -65,13 +65,17 @@
 </html>
 <script th:inline="javascript">
     $(document).ready(function(){
+        $("#countText").hide();
+        $(".lifeText").hide();
         $("#button-send").on("click", (e) => {
             send();
         });
         $("#game_start").on("click",(e) =>{
             game_start();
             $("#game_start").hide();
-            $(".life").text("점수 : "+ life);
+            $(".life").text(life);
+            $(".lifeText").show();
+            $("#countText").show();
         });
         const websocket = new WebSocket("ws://localhost:8080/ws/chat");
         var username;
@@ -121,14 +125,15 @@
             }
             else if(command == "answer"){
                 if(message == "correct" && status){
-                    $(".correct").text("정답입니다");
-                    $(".correct").setAttribute('style','color:blue');
+                    $("#correct").css('color','blue');
+                    $("#correct").text("정답입니다");
                     document.getElementById('msg').readOnly = true;
                 }
                 else{
                     if(status) {
-                        $(".correct").text("오답입니다");
-                        $(".correct").setAttribute('style','color:red');
+                        $("#correct").css('color','red');
+                        $("#correct").text("오답입니다");
+                        $("#correct").css('font-weight','bold');
                     }
                 }
             }
@@ -149,14 +154,31 @@
                             str += "</div></div></div></div>";
                             $("#msgArea").append(str);
                             life = life - 20;
-                            $("label[for='life']").text("점수 : " + life);
+                            if(($('.life').text() * 1) < 60){
+                                $('.life').css('color','red');
+                                $('.life').css('font-weight','bold');
+                            }
+                            $(".life").text(life);
                         }
                         document.getElementById('msg').readOnly = false;
                     } else {
-                        if(($(".count").text) * 1 < 2){
-                            $(".count").setAttribute('style','color:red');
+                        $("#count").text("  " + message);
+                        if(($("#count").text()) * 1 == 2){
+                            $("#count").css('color','rgb(255, 93, 93)');
+                            $("#count").css('font-weight','bold');
                         }
-                        $(".count").text("제한 시간 : " + message);
+                        else if(($("#count").text()) * 1 == 1){
+                            $("#count").css('color','rgb(255, 59, 44)');
+                            $("#count").css('font-weight','bold');
+                        }
+                        else if(($("#count").text()) * 1 == 0){
+                            $("#count").css('color','rgb(255, 0, 0)');
+                            $("#count").css('font-weight','bold');
+                        }
+                        else{
+                            $("#count").css('color','black');
+                            $("#count").css('font-weight','normal');
+                        }
                         console.log("시간 " + message);
                     }
                 }
