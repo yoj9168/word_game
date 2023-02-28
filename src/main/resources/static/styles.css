@@ -1,5 +1,5 @@
 .container-fluid{
-    background: #ffc0cb;
+    background: #D4A017;
     margin:10px;
 }
 body{
@@ -8,4 +8,13 @@ body{
 .container{
     margin-top: 5px;
     margin-bottom: 5px;
+}
+.initial_text{
+    margin-top: 20px;
+    font-size: large;
+    font-weight: bold;
+}
+.correct{
+    font-size: large;
+    font-weight: bold;
 }

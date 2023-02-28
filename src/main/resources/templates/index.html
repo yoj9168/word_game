@@ -11,20 +11,32 @@
             <div class="container">
                 <div class="row">
                     <div class="col">
-                        <label for = "initial_text"><b></b></label>
-                    </div>
-                    <div class="col">
-                        <label for = "count"><b></b></label>
-                    </div>
-                    <div class="col">
-                        <label for = "life"><b></b></label>
+                        <div class="d-flex align-items-center justify-content-center" style="height: 23px;">
+                            <p class="initial_text"></p>
+                        </div>
                     </div>
                 </div>
             </div>
             <div class="container">
                 <div class="row">
                     <div class="col">
-                        <label for = "correct"><b></b></label>
+                        <div class="d-flex align-items-center justify-content-center" style="height: 23px;">
+                            <p class="count"></p>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="d-flex align-items-center justify-content-center"style="height: 23px;">
+                            <p class="life"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="container">
+                <div class="row">
+                    <div class="col">
+                        <div class="d-flex align-items-center justify-content-center" style="height: 23px;">
+                            <p class="correct"></p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -59,7 +71,7 @@
         $("#game_start").on("click",(e) =>{
             game_start();
             $("#game_start").hide();
-            $("label[for='life']").text("점수 : " + life);
+            $(".life").text("점수 : "+ life);
         });
         const websocket = new WebSocket("ws://localhost:8080/ws/chat");
         var username;
@@ -109,12 +121,14 @@
             }
             else if(command == "answer"){
                 if(message == "correct" && status){
-                    $("label[for='correct']").text("정답입니다.");
+                    $(".correct").text("정답입니다");
+                    $(".correct").setAttribute('style','color:blue');
                     document.getElementById('msg').readOnly = true;
                 }
                 else{
                     if(status) {
-                        $("label[for='correct']").text("오답입니다.");
+                        $(".correct").text("오답입니다");
+                        $(".correct").setAttribute('style','color:red');
                     }
                 }
             }
@@ -139,13 +153,16 @@
                         }
                         document.getElementById('msg').readOnly = false;
                     } else {
-                        $("label[for='count']").text(message);
+                        if(($(".count").text) * 1 < 2){
+                            $(".count").setAttribute('style','color:red');
+                        }
+                        $(".count").text("제한 시간 : " + message);
                         console.log("시간 " + message);
                     }
                 }
             }
             else if(command == "firstLetter" && status){
-                $("label[for='initial_text']").text(message); //초성 설정
+                $(".initial_text").text(message);
             }
             else if(command == "word"){
                 var str = "<div class='d-flex justify-content-center'>";
