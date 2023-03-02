@@ -106,7 +106,7 @@
         }
 
         function onMessage(msg) {
-            if(life < 0){
+            if(life <= 0){
                 alert("게임에서 패배하셨습니다.");
                 onClose();
             }
@@ -114,7 +114,7 @@
             var jsonValue = JSON.parse(data);
             console.log("data "+data);
             var command = jsonValue.command;
-            var message = jsonValue.message;
+            var message = jsonValue. message;
             var list = jsonValue.list;
 
             var cur_session = username;
