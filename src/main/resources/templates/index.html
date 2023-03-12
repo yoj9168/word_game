@@ -64,6 +64,11 @@
 
 </html>
 <script th:inline="javascript">
+    function scrollToBottom() {
+        $('html, body').animate({
+            scrollTop: $(document).height()
+        }, 'slow');
+    }
     $(document).ready(function(){
         $("#countText").hide();
         $(".lifeText").hide();
@@ -77,6 +82,7 @@
             $(".lifeText").show();
             $("#countText").show();
         });
+
         const websocket = new WebSocket("ws://localhost:8080/ws/chat");
         var username;
         var life = 100;
@@ -106,7 +112,8 @@
         }
 
         function onMessage(msg) {
-            if(life <= 0){
+            scrollToBottom();
+            if(life < 0){
                 alert("게임에서 패배하셨습니다.");
                 onClose();
             }
